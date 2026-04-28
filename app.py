@@ -322,7 +322,7 @@ with btn1:
                 use_container_width=True
             )
             
-        with btn2:
+with btn2:
             drum_zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
             st.download_button(
                 label="📦 Download Drum Stems (.zip)",
