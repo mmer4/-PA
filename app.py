@@ -93,103 +93,118 @@ def schrijf_midi_events(events):
     mid.save(file=file_buffer)
     return file_buffer.getvalue()
 
-def add_hit(events, note, beat, duration_beats=0.25, velocity=100, channel=0):
-    # 480 ticks = 1 kwartnoot (beat)
-    abs_time = int(beat * 480)
+def add_hit(events, note, beat, duration_beats=0.25, velocity=100, channel=0, swing_amount=0):
+    # --- NIEUW: HUMANIZE ENGINE ---
+    shift = 0
+    if swing_amount > 0:
+        # Verschuif de timing een fractie (hoe hoger de swing, hoe losser)
+        max_shift = (swing_amount / 100.0) * 0.06 
+        shift = random.uniform(-max_shift, max_shift)
+        
+        # Varieer de aanslagkracht (velocity) voor een menselijk gevoel
+        vel_var = int((swing_amount / 100.0) * 20)
+        velocity = max(1, min(127, velocity + random.randint(-vel_var, vel_var)))
+
+    abs_time = int(max(0, beat + shift) * 480)
     duration = int(duration_beats * 480)
+    
     events.append({'time': abs_time, 'type': 'note_on', 'note': note, 'velocity': velocity, 'channel': channel})
     events.append({'time': abs_time + duration, 'type': 'note_off', 'note': note, 'velocity': 0, 'channel': channel})
 
-def generate_bassline_midi(root_number, genre):
+def generate_bassline_midi(root_number, genre, swing_amount):
     events = []
-    b = 36 + (root_number % 12) # Bas in het lage octaaf
+    b = 36 + (root_number % 12) 
     
     for bar in range(4):
-        offset = bar * 4 # 4 beats per maat
+        offset = bar * 4 
         if genre == "Trap":
-            add_hit(events, b, offset + 0, 1.0, 127) # Hard op de 1
-            add_hit(events, b, offset + 1.5, 0.5, 120) # De off-beat bounce
-            if bar == 3: 
-                add_hit(events, b + 12, offset + 3.5, 0.5, 120) # 808 Slide Up aan het eind!
-            elif bar % 2 == 1:
-                add_hit(events, b, offset + 3.5, 0.5, 110)
+            add_hit(events, b, offset + 0, 1.0, 127, 0, swing_amount) 
+            add_hit(events, b, offset + 1.5, 0.5, 120, 0, swing_amount) 
+            if bar == 3: add_hit(events, b + 12, offset + 3.5, 0.5, 120, 0, swing_amount) 
+            elif bar % 2 == 1: add_hit(events, b, offset + 3.5, 0.5, 110, 0, swing_amount)
         elif genre == "Hiphop":
-            add_hit(events, b, offset + 0, 1.5, 110)
-            add_hit(events, b, offset + 2.5, 1.0, 100) # Syncopatie
-            if bar == 3: add_hit(events, b + 7, offset + 3.5, 0.5, 90) # Een 'kwint' wandeling
-        else: # R&B
-            add_hit(events, b, offset + 0, 3.0, 100) # Lange, zwoele basnoot
+            add_hit(events, b, offset + 0, 1.5, 110, 0, swing_amount)
+            add_hit(events, b, offset + 2.5, 1.0, 100, 0, swing_amount) 
+            if bar == 3: add_hit(events, b + 7, offset + 3.5, 0.5, 90, 0, swing_amount) 
+        else: 
+            add_hit(events, b, offset + 0, 3.0, 100, 0, swing_amount) 
             if bar == 3: 
-                add_hit(events, b - 1, offset + 3.0, 0.5, 90) # Walkdown
-                add_hit(events, b - 2, offset + 3.5, 0.5, 80)
+                add_hit(events, b - 1, offset + 3.0, 0.5, 90, 0, swing_amount) 
+                add_hit(events, b - 2, offset + 3.5, 0.5, 80, 0, swing_amount)
     return schrijf_midi_events(events)
 
-def generate_drum_zip(genre):
+def generate_drum_zip(genre, complexity, swing_amount):
     events = []
-    k, s, h, rim = 36, 38, 42, 37 # Kick, Snare, Hihat, Rimshot
+    k, s, h, rim = 36, 38, 42, 37 
     
     for bar in range(4):
         offset = bar * 4
         
+        # COMPLEXITY: Basic heeft GEEN hihats, Modern heeft standaard, Busy heeft rolls
+        is_basic = "Basic" in complexity
+        is_busy = "Busy" in complexity
+        
         if genre == "Trap":
-            for i in range(8):
-                beat_pos = offset + (i * 0.5)
-                if i % 2 == 1 and random.random() > 0.7:
-                    add_hit(events, h, beat_pos, 0.1, 110, channel=9)
-                    add_hit(events, h, beat_pos + 0.166, 0.1, 90, channel=9)
-                    add_hit(events, h, beat_pos + 0.333, 0.1, 80, channel=9)
-                else:
-                    add_hit(events, h, beat_pos, 0.1, 100, channel=9)
+            if not is_basic:
+                for i in range(8):
+                    beat_pos = offset + (i * 0.5)
+                    if is_busy and i % 2 == 1 and random.random() > 0.6:
+                        add_hit(events, h, beat_pos, 0.1, 110, 9, swing_amount)
+                        add_hit(events, h, beat_pos + 0.166, 0.1, 90, 9, swing_amount)
+                        add_hit(events, h, beat_pos + 0.333, 0.1, 80, 9, swing_amount)
+                    else:
+                        add_hit(events, h, beat_pos, 0.1, 100, 9, swing_amount)
 
-            add_hit(events, k, offset + 0, velocity=127, channel=9)
-            add_hit(events, k, offset + 1.5, velocity=115, channel=9)
-            if bar % 2 == 1: add_hit(events, k, offset + 3.5, velocity=110, channel=9)
-            add_hit(events, s, offset + 2, velocity=127, channel=9) 
+            add_hit(events, k, offset + 0, velocity=127, channel=9, swing_amount=swing_amount)
+            add_hit(events, s, offset + 2, velocity=127, channel=9, swing_amount=swing_amount) 
+            
+            if not is_basic: add_hit(events, k, offset + 1.5, velocity=115, channel=9, swing_amount=swing_amount)
+            if is_busy and bar % 2 == 1: add_hit(events, k, offset + 3.5, velocity=110, channel=9, swing_amount=swing_amount)
                 
         elif genre == "Hiphop":
-            for i in range(8): 
-                vel = 95 if i % 2 == 0 else 65
-                add_hit(events, h, offset + (i * 0.5), 0.1, vel, channel=9)
+            if not is_basic:
+                for i in range(8): 
+                    vel = 95 if i % 2 == 0 else 65
+                    add_hit(events, h, offset + (i * 0.5), 0.1, vel, 9, swing_amount)
             
-            add_hit(events, k, offset + 0, velocity=110, channel=9)
-            add_hit(events, k, offset + 2.5, velocity=90, channel=9)
+            add_hit(events, k, offset + 0, velocity=110, channel=9, swing_amount=swing_amount)
+            add_hit(events, s, offset + 1, velocity=110, channel=9, swing_amount=swing_amount) 
+            add_hit(events, s, offset + 3, velocity=110, channel=9, swing_amount=swing_amount)
             
-            add_hit(events, s, offset + 1, velocity=110, channel=9) 
-            add_hit(events, s, offset + 3, velocity=110, channel=9)
+            if not is_basic: add_hit(events, k, offset + 2.5, velocity=90, channel=9, swing_amount=swing_amount)
             
-            add_hit(events, s, offset + 1.75, velocity=45, channel=9) 
-            if bar % 2 == 1:
-                add_hit(events, s, offset + 3.75, velocity=55, channel=9)
-                add_hit(events, k, offset + 3.5, velocity=70, channel=9)
+            if is_busy:
+                add_hit(events, s, offset + 1.75, velocity=45, channel=9, swing_amount=swing_amount) 
+                if bar % 2 == 1:
+                    add_hit(events, s, offset + 3.75, velocity=55, channel=9, swing_amount=swing_amount)
+                    add_hit(events, k, offset + 3.5, velocity=70, channel=9, swing_amount=swing_amount)
                 
-        else:
-            for i in range(16): 
-                vel = 85 if i % 4 == 0 else (65 if i % 2 == 0 else 45)
-                add_hit(events, h, offset + (i * 0.25), 0.1, vel, channel=9)
+        else: # R&B
+            if not is_basic:
+                for i in range(16): 
+                    vel = 85 if i % 4 == 0 else (65 if i % 2 == 0 else 45)
+                    add_hit(events, h, offset + (i * 0.25), 0.1, vel, 9, swing_amount)
             
-            add_hit(events, k, offset + 0, velocity=100, channel=9)
-            add_hit(events, k, offset + 1.75, velocity=85, channel=9) 
+            add_hit(events, k, offset + 0, velocity=100, channel=9, swing_amount=swing_amount)
+            add_hit(events, rim, offset + 1, velocity=115, channel=9, swing_amount=swing_amount)
+            add_hit(events, rim, offset + 3, velocity=115, channel=9, swing_amount=swing_amount)
             
-            add_hit(events, rim, offset + 1, velocity=115, channel=9)
-            add_hit(events, rim, offset + 3, velocity=115, channel=9)
+            if not is_basic: add_hit(events, k, offset + 1.75, velocity=85, channel=9, swing_amount=swing_amount) 
             
-            add_hit(events, rim, offset + 2.75, velocity=40, channel=9) 
-            if bar == 3:
-                add_hit(events, k, offset + 3.5, velocity=60, channel=9)
-                    
-    # --- NIEUW: SPLIT DE NOTEN IN APARTE SPOREN ---
+            if is_busy:
+                add_hit(events, rim, offset + 2.75, velocity=40, channel=9, swing_amount=swing_amount) 
+                if bar == 3: add_hit(events, k, offset + 3.5, velocity=60, channel=9, swing_amount=swing_amount)
+
     events_kick = [e for e in events if e['note'] == k]
     events_snare = [e for e in events if e['note'] in (s, rim)]
     events_hihat = [e for e in events if e['note'] == h]
     
-    # --- NIEUW: MAAK EEN ZIP BESTAND ---
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-        # We schrijven 4 losse MIDI bestanden in de ZIP map
         zip_file.writestr("1_PA_Kick.mid", schrijf_midi_events(events_kick))
         zip_file.writestr("2_PA_Snare.mid", schrijf_midi_events(events_snare))
         zip_file.writestr("3_PA_Hihats.mid", schrijf_midi_events(events_hihat))
-        zip_file.writestr("4_PA_Full_Groove.mid", schrijf_midi_events(events)) # Alles bij elkaar
+        zip_file.writestr("4_PA_Full_Groove.mid", schrijf_midi_events(events)) 
         
     return zip_buffer.getvalue()
  
@@ -208,7 +223,11 @@ st.markdown("""
 st.sidebar.markdown("# 🎧 PA")
 st.sidebar.markdown("### *Producer Adviser v1.0*")
 st.sidebar.divider()
+st.sidebar.markdown("### 🎛️ Generator Settings")
 genre = st.sidebar.selectbox("Kies je Genre", ["Hiphop", "R&B", "Trap"])
+complexity = st.sidebar.selectbox("Drum Complexiteit", ["Basic (Alleen basis)", "Modern (Standaard)", "Busy (Rolls & Ghostnotes)"], index=1)
+swing_amount = st.sidebar.slider("Swing / Humanize (%)", min_value=0, max_value=100, value=20, step=5)
+st.sidebar.info("💡 **Tip:** Zet Swing op 0% voor strakke elektronische beats, of op 80% voor een slepende J Dilla of Lo-Fi groove.")
 
 # Hoofdscherm
 st.title("🎹 PA: Producer Adviser")
@@ -293,18 +312,18 @@ if uploaded_file:
         # We maken 2 kolommen voor de 2 knoppen
         btn1, btn2 = st.columns(2)
         
-    with btn1:
-        bass_midi_bytes = generate_bassline_midi(data['root_number'], genre)
-        st.download_button(
-            label="🎸 Download Baslijn",
-            data=bass_midi_bytes,
-            file_name=f"PA_Bass_{genre}_{root_note}.mid",
-            mime="audio/midi",
-            use_container_width=True
-        )
-        
-    with btn2:
-            drum_zip_bytes = generate_drum_zip(genre)
+with btn1:
+            bass_midi_bytes = generate_bassline_midi(data['root_number'], genre, swing_amount)
+            st.download_button(
+                label="🎸 Download Baslijn",
+                data=bass_midi_bytes,
+                file_name=f"PA_Bass_{genre}_{root_note}.mid",
+                mime="audio/midi",
+                use_container_width=True
+            )
+            
+        with btn2:
+            drum_zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
             st.download_button(
                 label="📦 Download Drum Stems (.zip)",
                 data=drum_zip_bytes,
