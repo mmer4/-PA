@@ -207,6 +207,51 @@ def generate_drum_zip(genre, complexity, swing_amount):
         zip_file.writestr("4_PA_Full_Groove.mid", schrijf_midi_events(events)) 
         
     return zip_buffer.getvalue()
+
+def generate_melody_midi(root_number, scale_type, genre, swing_amount):
+    events = []
+    # Zet de melodie in een hoger octaaf (octaaf 5, rond MIDI noot 72)
+    base_note = 60 + (root_number % 12) 
+    
+    # Bepaal de veilige afstanden (intervallen) op basis van de ontdekte toonladder
+    intervals = [0, 2, 4, 5, 7, 9, 11] # Standaard Majeur
+    if "Mineur" in scale_type:
+        if "Harmonisch" in scale_type: intervals = [0, 2, 3, 5, 7, 8, 11]
+        else: intervals = [0, 2, 3, 5, 7, 8, 10] # Natuurlijk Mineur
+    elif scale_type == "Dorisch": intervals = [0, 2, 3, 5, 7, 9, 10]
+    elif scale_type == "Mixolydisch": intervals = [0, 2, 4, 5, 7, 9, 10]
+    
+    # Genereer een lijst met 100% zuivere noten
+    safe_notes = [base_note + i for i in intervals]
+    
+    for bar in range(4):
+        offset = bar * 4
+        
+        if genre == "Trap":
+            # Snelle, repetitieve hoge melodie (plucks/bells)
+            for i in range(8):
+                if random.random() > 0.4: # 60% kans op een noot
+                    # Kies willekeurig de grondtoon, de terts of de kwint
+                    note = random.choice([safe_notes[0], safe_notes[2], safe_notes[4], safe_notes[0]+12])
+                    # Zet hem nog een octaaf hoger (+12) voor die Trap bell vibe
+                    add_hit(events, note + 12, offset + (i * 0.5), 0.25, random.randint(90, 110), 0, swing_amount)
+                    
+        elif genre == "Hiphop":
+            # Meer jazzy, gesyncopeerde timing met meer ademruimte
+            if random.random() > 0.3: add_hit(events, safe_notes[0], offset + 0, 0.5, 100, 0, swing_amount)
+            if random.random() > 0.5: add_hit(events, safe_notes[2], offset + 1.5, 0.5, 90, 0, swing_amount)
+            if random.random() > 0.3: add_hit(events, safe_notes[4], offset + 2.5, 0.5, 95, 0, swing_amount)
+            if bar % 2 == 1: add_hit(events, safe_notes[6] - 12, offset + 3.5, 0.5, 80, 0, swing_amount) # Jazzy loopje
+                
+        else: # R&B
+            # Gladde, langzame arpeggio's die door de akkoorden heen rollen
+            add_hit(events, safe_notes[0], offset + 0, 1.0, 90, 0, swing_amount)
+            add_hit(events, safe_notes[2], offset + 1.0, 1.0, 85, 0, swing_amount)
+            add_hit(events, safe_notes[4], offset + 2.0, 1.0, 80, 0, swing_amount)
+            add_hit(events, safe_notes[0]+12, offset + 3.0, 1.0, 75, 0, swing_amount) # Octaaf sprong omhoog
+
+    return schrijf_midi_events(events)
+
  
 # --- INTERFACE CONFIGURATIE (De nieuwe UX) ---
 st.set_page_config(page_title="PA | Producer Adviser", layout="wide", initial_sidebar_state="expanded")
@@ -305,12 +350,13 @@ if uploaded_file:
             ]
             st.success(random.choice(rb_tips))
            
+
 # --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
         st.divider()
         st.write("### 🎹 Exporteer MIDI Starters")
         
-        # Hier definiëren we btn1 en btn2, zodat de NameError weggaat!
-        btn1, btn2 = st.columns(2)
+        # We maken nu 3 kolommen!
+        btn1, btn2, btn3 = st.columns(3)
         
         with btn1:
             bass_midi_bytes = generate_bassline_midi(data['root_number'], genre, swing_amount)
@@ -325,9 +371,19 @@ if uploaded_file:
         with btn2:
             drum_zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
             st.download_button(
-                label="📦 Download Drum Stems (.zip)",
+                label="📦 Download Drum Stems",
                 data=drum_zip_bytes,
                 file_name=f"PA_Drum_Stems_{genre}.zip",
                 mime="application/zip",
+                use_container_width=True
+            )
+            
+        with btn3:
+            melody_midi_bytes = generate_melody_midi(data['root_number'], scale, genre, swing_amount)
+            st.download_button(
+                label="🎹 Download Melodie",
+                data=melody_midi_bytes,
+                file_name=f"PA_Melody_{genre}_{scale}.mid",
+                mime="audio/midi",
                 use_container_width=True
             )
