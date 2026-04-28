@@ -276,12 +276,25 @@ st.sidebar.info("💡 **Tip:** Zet Swing op 0% voor strakke elektronische beats,
 
 # Hoofdscherm
 st.title("🎹 PA: Producer Adviser")
-st.write(f"Sla de brug tussen creativiteit en techniek in **{genre}**.")
+st.markdown(f"*Jouw AI-gedreven co-producer voor **{genre}**.*")
 
-uploaded_file = st.file_uploader("Drop je MIDI-file hier", type=['mid'])
+uploaded_file = st.file_uploader("Drop je MIDI-akkoorden hier", type=['mid'])
 
+# --- NIEUW: ONBOARDING SCHERM (Als er nog niks is geüpload) ---
+if not uploaded_file:
+    st.divider()
+    st.markdown("### 🚀 Hoe werkt het?")
+    
+    col1, col2, col3 = st.columns(3)
+    col1.info("**1. Upload je akkoorden**\n\nSleep een .mid bestand met je basisakkoorden in het vak hierboven.")
+    col2.warning("**2. Check je frequenties**\n\nPA analyseert je noten op toonsoort, ritme en botsingen (modder) in je mix.")
+    col3.success("**3. Genereer Stems**\n\nDownload unieke, humanized baslijnen, drum stems en melodieën, direct klaar voor je DAW.")
+    
+    st.divider()
+    st.markdown("<p style='text-align: center; color: #6b7280; font-size: 14px;'>© 2026 PA (Producer Adviser) - Gebouwd voor de moderne producer.</p>", unsafe_allow_html=True)
+
+# --- START ANALYSE (Als er wél iets is geüpload) ---
 if uploaded_file:
-    data = analyze_midi_deep(uploaded_file)
     
     if data:
         st.markdown("### 🛠️ Live Analyse")
