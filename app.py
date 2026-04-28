@@ -295,6 +295,7 @@ if not uploaded_file:
 
 # --- START ANALYSE (Als er wél iets is geüpload) ---
 if uploaded_file:
+    data = analyze_midi_deep(uploaded_file)
     
     if data:
         st.markdown("### 🛠️ Live Analyse")
