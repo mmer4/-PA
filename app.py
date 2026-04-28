@@ -254,8 +254,7 @@ def generate_melody_midi(root_number, scale_type, genre, swing_amount):
 
  
 # --- INTERFACE CONFIGURATIE (De nieuwe UX) ---
-st.set_page_config(page_title="PA | Producer Adviser", layout="wide", initial_sidebar_state="expanded")
-
+st.set_page_config(page_title="PA | Producer Adviser", page_icon="🎧", layout="wide", initial_sidebar_state="expanded")
 # Custom CSS voor de "Dark Mode VST-vibe"
 st.markdown("""
     <style>
@@ -264,8 +263,12 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+
 # Sidebar
-st.sidebar.markdown("# 🎧 PA")
+try:
+    st.sidebar.image("logo.png", use_container_width=True) # Laadt je geüploade logo in!
+except:
+    st.sidebar.markdown("# 🎧 PA") # Fallback als het logo even niet laadt
 st.sidebar.markdown("### *Producer Adviser v1.0*")
 st.sidebar.divider()
 st.sidebar.markdown("### 🎛️ Generator Settings")
