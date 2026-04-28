@@ -240,10 +240,11 @@ if uploaded_file:
             low_mid_val = chart_df.loc[chart_df['Gebied'] == '3. Low-Mid (250-500Hz)', 'Aantal Noten'].values[0]
             sub_bass_val = chart_df.loc[chart_df['Gebied'] == '1. Sub (0-60Hz)', 'Aantal Noten'].values[0]
 
-            if low_mid_val >= 3:
-                st.error("**MODDER-ALARM:** Te veel noten in het Low-Mid gebied (250-500Hz). Je mix wordt troebel.")
-            elif sub_bass_val >= 1:
-                st.warning("**SUB-COLLISION:** Akkoord-noten in het Sub-gebied. Dit vecht met je Kick/808.")
+           # Slimmer Modder-Alarm: Kijkt naar de dichtheid (5 of meer noten is te druk)
+            if low_mid_val >= 5:
+                st.error(f"**MODDER-ALARM:** Je hebt {low_mid_val} noten in het Low-Mid gebied (250-500Hz). Dit botst met je kick en bas! Verplaats minimaal 2 noten een octaaf omhoog.")
+            elif low_mid_val == 4:
+                st.warning("**LET OP (Low-Mid):** Het begint een beetje druk te worden in het lage middengebied. EQ dit gebied ietsjes weg op je synth.")
             else:
                 st.success("**MIX IS CLEAN:** Goede verdeling van frequenties gevonden.")
             
@@ -255,16 +256,35 @@ if uploaded_file:
             st.info(f"• **Drums:** Gebruik een {('korte, droge' if data['tempo'] > 110 else 'diepe, galmende')} kick die past bij {data['vibe']}.")
             # --- NIEUW: AI CO-PRODUCER BLOK ---
         st.divider()
-        st.markdown("### 🤖 AI Co-Producer: Bassline Blueprint")
+        st.markdown("### 🤖 AI Co-Producer: Dynamisch Studio Advies")
         
         root_note = data['root_name']
+        scale = data['scale']
+        tempo = data['tempo']
         
         if genre == "Hiphop":
-            st.info(f"**De Boom-Bap Bass:** Speel je baslijn voornamelijk rond de noot **{root_note}**. Laat ruimte op de 2e en 4e tel (waar je snare valt). Tip: Slide aan het einde van de 4e maat omhoog voor die klassieke swing.")
+            hiphop_tips = [
+                f"**De Boom-Bap Bass:** Omdat je in **{scale}** zit, speel je baslijn voornamelijk rond de noot **{root_note}**. Tip: Slide aan het eind van de 4e maat kort omhoog.",
+                f"**Lo-Fi Pocket:** Je tempo is {tempo} BPM. Probeer de baslijn net een paar milliseconden ná de kick te laten vallen voor een enorm slepende, laid-back groove.",
+                f"**Melodische Variatie:** Gebruik de 5e noot in je **{scale}** toonladder als 'springplank' vlak voordat je terugkeert naar je **{root_note}** basnoot."
+            ]
+            st.info(random.choice(hiphop_tips))
+            
         elif genre == "Trap":
-            st.error(f"**De 808 Bounce:** Zet een harde 808 op de **{root_note}**. Speel snelle, korte accenten op de 'off-beats'. Als het akkoord wisselt, laat de 808 dan pas op de tweede tel meekomen voor extra bounce.")
+            trap_tips = [
+                f"**De 808 Bounce:** Zet een harde 808 op de **{root_note}**. Omdat het **{scale}** is, klinkt het ijzersterk als je snelle, donkere accenten op de 'off-beats' plaatst.",
+                f"**808 Glide:** Start op de **{root_note}** en teken een snelle 808-slide (portamento) naar een octaaf hoger, exact vlak voordat de snare op de 3e tel valt.",
+                f"**Syncopated Drop:** Laat je 808 de eerste tel rusten als het akkoord wisselt. Val pas in op de 'en' van de 1. Dit geeft je beat een enorme onverwachte bounce."
+            ]
+            st.error(random.choice(trap_tips))
+            
         elif genre == "R&B":
-            st.success(f"**De Soulful Sub:** Begin op **{root_note}**, maar 'wandel' rond. Speel net een fractie *na* de tel (laid-back) voor die sexy groove en loop via de toonladder langzaam omlaag.")
+            rb_tips = [
+                f"**De Soulful Sub:** Begin op **{root_note}**, maar blijf daar niet zweven. Wandel via de **{scale}** toonladder langzaam omlaag richting de volgende tel.",
+                f"**Neo-Soul Timing:** Speel je bas extreem zacht (lage velocity) en nét te laat achter de tel (D'Angelo stijl). Dit past perfect bij het {tempo} BPM tempo.",
+                f"**R&B Arp Bass:** Pluk de hoge noten uit je **{root_note}** akkoord en speel ze in het bas-register één voor één af als een trage, zwoele bas-arpeggio."
+            ]
+            st.success(random.choice(rb_tips))
            
         # --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
         st.divider()
