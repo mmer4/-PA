@@ -305,14 +305,14 @@ if uploaded_file:
             ]
             st.success(random.choice(rb_tips))
            
-        # --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
+# --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
         st.divider()
         st.write("### 🎹 Exporteer MIDI Starters")
         
-        # We maken 2 kolommen voor de 2 knoppen
+        # Hier definiëren we btn1 en btn2, zodat de NameError weggaat!
         btn1, btn2 = st.columns(2)
         
-with btn1:
+        with btn1:
             bass_midi_bytes = generate_bassline_midi(data['root_number'], genre, swing_amount)
             st.download_button(
                 label="🎸 Download Baslijn",
@@ -322,7 +322,7 @@ with btn1:
                 use_container_width=True
             )
             
-with btn2:
+        with btn2:
             drum_zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
             st.download_button(
                 label="📦 Download Drum Stems (.zip)",
