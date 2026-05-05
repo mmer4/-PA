@@ -5,40 +5,91 @@ import pandas as pd
 import random
 import zipfile
 # --- TAALINSTELLINGEN ---
+# --- TAALINSTELLINGEN ---
 LANGUAGES = {
     "NL": {
         "sidebar_title": "### *Producer Adviser v1.0*",
-        "gen_settings": "🎛️ Generator Instellingen",
+        "gen_settings": "### 🎛️ Generator Instellingen",
         "choose_genre": "Kies je Genre",
         "complexity": "Drum Complexiteit",
         "swing": "Swing / Humanize (%)",
+        "feedback_btn": "📝 Geef Feedback",
         "drop_midi": "Drop je MIDI-akkoorden hier",
-        "how_it_works": "🚀 Hoe werkt het?",
+        "how_it_works": "Hoe werkt het?",
         "step1": "**1. Upload je akkoorden**\n\nSleep een .mid bestand met je basisakkoorden in het vak hierboven.",
         "step2": "**2. Check je frequenties**\n\nPA analyseert je noten op toonsoort, ritme en botsingen.",
         "step3": "**3. Genereer Stems**\n\nDownload unieke baslijnen, drum stems en melodieën.",
         "analysis_title": "### 🛠️ Live Analyse",
+        "metric_scale": "Toonladder",
+        "metric_notes": "Noten",
+        "chart_title": "### 📊 Frequentie Blauwdruk",
         "collision_title": "### ⚠️ Collision Alerts",
+        "mud_alarm": "**MODDER-ALARM:** Je hebt {} noten in het Low-Mid gebied (250-500Hz). Dit botst met je kick en bas! Verplaats minimaal 2 noten een octaaf omhoog.",
+        "low_mid_warn": "**LET OP (Low-Mid):** Het begint een beetje druk te worden in het lage middengebied. EQ dit gebied ietsjes weg op je synth.",
+        "sub_warn": "**SUB-COLLISION:** Akkoord-noten in het Sub-gebied. Dit vecht met je Kick/808.",
+        "clean_mix": "**MIX IS CLEAN:** Goede verdeling van frequenties gevonden.",
         "advice_title": "### 🤖 AI Co-Producer: Dynamisch Studio Advies",
+        "hiphop_tips": [
+            "**De Boom-Bap Bass:** Omdat je in **{scale}** zit, speel je baslijn voornamelijk rond de noot **{root_note}**. Tip: Slide aan het eind van de 4e maat kort omhoog.",
+            "**Lo-Fi Pocket:** Je tempo is {tempo} BPM. Probeer de baslijn net een paar milliseconden ná de kick te laten vallen voor een enorm slepende groove.",
+            "**Melodische Variatie:** Gebruik de 5e noot in je **{scale}** toonladder als 'springplank' vlak voordat je terugkeert naar je **{root_note}** basnoot."
+        ],
+        "trap_tips": [
+            "**De 808 Bounce:** Zet een harde 808 op de **{root_note}**. Omdat het **{scale}** is, klinkt het ijzersterk als je snelle accenten op de 'off-beats' plaatst.",
+            "**808 Glide:** Start op de **{root_note}** en teken een snelle 808-slide naar een octaaf hoger, exact vlak voordat de snare op de 3e tel valt.",
+            "**Syncopated Drop:** Laat je 808 de eerste tel rusten als het akkoord wisselt. Val pas in op de 'en' van de 1. Dit geeft je beat een enorme bounce."
+        ],
+        "rb_tips": [
+            "**De Soulful Sub:** Begin op **{root_note}**, maar blijf daar niet zweven. Wandel via de **{scale}** toonladder langzaam omlaag richting de volgende tel.",
+            "**Neo-Soul Timing:** Speel je bas extreem zacht en nét te laat achter de tel (D'Angelo stijl). Dit past perfect bij het {tempo} BPM tempo.",
+            "**R&B Arp Bass:** Pluk de hoge noten uit je **{root_note}** akkoord en speel ze één voor één af als een trage, zwoele bas-arpeggio."
+        ],
         "export_title": "### 🎹 Exporteer MIDI Starters",
-        "feedback_btn": "📝 Geef Feedback"
+        "btn_bass": "🎸 Download Baslijn",
+        "btn_drums": "📦 Download Drum Stems",
+        "btn_melody": "🎹 Download Melodie"
     },
     "EN": {
         "sidebar_title": "### *Producer Adviser v1.0*",
-        "gen_settings": "🎛️ Generator Settings",
+        "gen_settings": "### 🎛️ Generator Settings",
         "choose_genre": "Choose your Genre",
         "complexity": "Drum Complexity",
         "swing": "Swing / Humanize (%)",
+        "feedback_btn": "📝 Give Feedback",
         "drop_midi": "Drop your MIDI chords here",
-        "how_it_works": "🚀 How does it work?",
+        "how_it_works": "How does it work?",
         "step1": "**1. Upload your chords**\n\nDrag a .mid file with your base chords into the box above.",
         "step2": "**2. Check your frequencies**\n\nPA analyzes your notes for key, rhythm, and collisions.",
         "step3": "**3. Generate Stems**\n\nDownload unique basslines, drum stems, and melodies.",
         "analysis_title": "### 🛠️ Live Analysis",
+        "metric_scale": "Scale",
+        "metric_notes": "Notes",
+        "chart_title": "### 📊 Frequency Blueprint",
         "collision_title": "### ⚠️ Collision Alerts",
+        "mud_alarm": "**MUD ALARM:** You have {} notes in the Low-Mid area (250-500Hz). This clashes with your kick and bass! Move at least 2 notes an octave up.",
+        "low_mid_warn": "**CAUTION (Low-Mid):** It's getting a bit crowded in the lower mid-range. EQ this area slightly on your synth.",
+        "sub_warn": "**SUB-COLLISION:** Chord notes in the Sub area. This fights with your Kick/808.",
+        "clean_mix": "**MIX IS CLEAN:** Good frequency distribution found.",
         "advice_title": "### 🤖 AI Co-Producer: Dynamic Studio Advice",
+        "hiphop_tips": [
+            "**The Boom-Bap Bass:** Because you are in **{scale}**, play your bassline mostly around the **{root_note}**. Tip: Slide up briefly at the end of the 4th bar.",
+            "**Lo-Fi Pocket:** Your tempo is {tempo} BPM. Try to drop the bassline just a few milliseconds after the kick for a heavily dragging, laid-back groove.",
+            "**Melodic Variation:** Use the 5th note in your **{scale}** scale as a 'springboard' just before returning to your **{root_note}** bass note."
+        ],
+        "trap_tips": [
+            "**The 808 Bounce:** Put a hard 808 on the **{root_note}**. Since it's **{scale}**, it sounds incredibly strong if you place fast accents on the off-beats.",
+            "**808 Glide:** Start on the **{root_note}** and draw a fast 808-slide an octave higher, exactly right before the snare hits on the 3rd beat.",
+            "**Syncopated Drop:** Rest your 808 on the first beat when the chord changes. Drop in on the 'and' of the 1. This gives your beat a huge unexpected bounce."
+        ],
+        "rb_tips": [
+            "**The Soulful Sub:** Start on **{root_note}**, but don't just hover there. Walk down the **{scale}** slowly towards the next beat.",
+            "**Neo-Soul Timing:** Play your bass extremely soft and just a bit late behind the beat (D'Angelo style). This fits perfectly with the {tempo} BPM tempo.",
+            "**R&B Arp Bass:** Pluck the high notes from your **{root_note}** chord and play them one by one in the bass register as a slow, sultry bass arpeggio."
+        ],
         "export_title": "### 🎹 Export MIDI Starters",
-        "feedback_btn": "📝 Give Feedback"
+        "btn_bass": "🎸 Download Bassline",
+        "btn_drums": "📦 Download Drum Stems",
+        "btn_melody": "🎹 Download Melody"
     }
 }
 # --- FUNCTIE 1: FREQUENTIE DATA ---
@@ -325,105 +376,82 @@ st.sidebar.markdown("### 🧪 Beta Tester?")
 st.sidebar.link_button(T["feedback_btn"], "https://forms.gle/hfFYLywgzZYjzKDGA")
 # Hoofdscherm
 st.title("🎹 PA: Producer Adviser")
-st.markdown(f"*Jouw AI-gedreven co-producer voor **{genre}**.*")
 
-uploaded_file = st.file_uploader("Drop je MIDI-akkoorden hier", type=['mid'])
+uploaded_file = st.file_uploader(T["drop_midi"], type=['mid'])
 
-# --- NIEUW: ONBOARDING SCHERM (Als er nog niks is geüpload) ---
 if not uploaded_file:
     st.divider()
-    st.markdown(f"### {T['how_it_works']}")
+    st.markdown(f"### 🚀 {T['how_it_works']}")
     
     col1, col2, col3 = st.columns(3)
     col1.info(T["step1"])
     col2.warning(T["step2"])
     col3.success(T["step3"])
-    st.divider()
-    st.markdown("<p style='text-align: center; color: #6b7280; font-size: 14px;'>© 2026 PA (Producer Adviser) - Gebouwd voor de moderne producer.</p>", unsafe_allow_html=True)
 
 # --- START ANALYSE (Als er wél iets is geüpload) ---
 if uploaded_file:
     data = analyze_midi_deep(uploaded_file)
     
     if data:
-        st.markdown("### 🛠️ Live Analyse")
+        st.markdown(T["analysis_title"])
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("BPM", data['tempo'])
-        m2.metric("Register", data['register'])
-        m3.metric("Toonladder", f"{data['root_name']} {data['scale']}")
-        m4.metric("Noten", data['notes_count'])
+        m2.metric("Register", data['register']) 
+        m3.metric(T["metric_scale"], f"{data['root_name']} {data['scale']}")
+        m4.metric(T["metric_notes"], data['notes_count'])
 
         st.divider()
         col_left, col_right = st.columns([2, 1])
 
         with col_left:
-            st.markdown("### 📊 Frequency Blueprint")
+            st.markdown(T["chart_title"])
             chart_df = get_frequency_data(data['notes'])
             st.line_chart(chart_df.set_index('Gebied'), color="#00d1ff")
 
         with col_right:
-            st.markdown("### ⚠️ Collision Alerts")
+            st.markdown(T["collision_title"])
             low_mid_val = chart_df.loc[chart_df['Gebied'] == '3. Low-Mid (250-500Hz)', 'Aantal Noten'].values[0]
             sub_bass_val = chart_df.loc[chart_df['Gebied'] == '1. Sub (0-60Hz)', 'Aantal Noten'].values[0]
 
-           # Slimmer Modder-Alarm: Kijkt naar de dichtheid (5 of meer noten is te druk)
             if low_mid_val >= 5:
-                st.error(f"**MODDER-ALARM:** Je hebt {low_mid_val} noten in het Low-Mid gebied (250-500Hz). Dit botst met je kick en bas! Verplaats minimaal 2 noten een octaaf omhoog.")
+                st.error(T["mud_alarm"].format(low_mid_val))
             elif low_mid_val == 4:
-                st.warning("**LET OP (Low-Mid):** Het begint een beetje druk te worden in het lage middengebied. EQ dit gebied ietsjes weg op je synth.")
+                st.warning(T["low_mid_warn"])
+            elif sub_bass_val >= 1:
+                st.warning(T["sub_warn"])
             else:
-                st.success("**MIX IS CLEAN:** Goede verdeling van frequenties gevonden.")
+                st.success(T["clean_mix"])
             
         st.divider()
-        with st.expander("🚀 Volgende Stappen voor je Productie", expanded=True):
-            delay_ms = round(60000 / data['tempo'] / 2, 2)
-            st.write("Gebaseerd op deze analyse raden we het volgende aan:")
-            st.info(f"• **Delay:** Stel je delay in op **{delay_ms} ms** voor een perfecte 1/8 ritme-sync.")
-            st.info(f"• **Drums:** Gebruik een {('korte, droge' if data['tempo'] > 110 else 'diepe, galmende')} kick die past bij {data['vibe']}.")
-            # --- NIEUW: AI CO-PRODUCER BLOK ---
-        st.divider()
-        st.markdown("### 🤖 AI Co-Producer: Dynamisch Studio Advies")
+        st.markdown(T["advice_title"])
         
         root_note = data['root_name']
         scale = data['scale']
         tempo = data['tempo']
         
+        # --- DYNAMISCHE AI TIPS ---
         if genre == "Hiphop":
-            hiphop_tips = [
-                f"**De Boom-Bap Bass:** Omdat je in **{scale}** zit, speel je baslijn voornamelijk rond de noot **{root_note}**. Tip: Slide aan het eind van de 4e maat kort omhoog.",
-                f"**Lo-Fi Pocket:** Je tempo is {tempo} BPM. Probeer de baslijn net een paar milliseconden ná de kick te laten vallen voor een enorm slepende, laid-back groove.",
-                f"**Melodische Variatie:** Gebruik de 5e noot in je **{scale}** toonladder als 'springplank' vlak voordat je terugkeert naar je **{root_note}** basnoot."
-            ]
-            st.info(random.choice(hiphop_tips))
+            tips = [tip.format(scale=scale, root_note=root_note, tempo=tempo) for tip in T["hiphop_tips"]]
+            st.info(random.choice(tips))
             
         elif genre == "Trap":
-            trap_tips = [
-                f"**De 808 Bounce:** Zet een harde 808 op de **{root_note}**. Omdat het **{scale}** is, klinkt het ijzersterk als je snelle, donkere accenten op de 'off-beats' plaatst.",
-                f"**808 Glide:** Start op de **{root_note}** en teken een snelle 808-slide (portamento) naar een octaaf hoger, exact vlak voordat de snare op de 3e tel valt.",
-                f"**Syncopated Drop:** Laat je 808 de eerste tel rusten als het akkoord wisselt. Val pas in op de 'en' van de 1. Dit geeft je beat een enorme onverwachte bounce."
-            ]
-            st.error(random.choice(trap_tips))
+            tips = [tip.format(scale=scale, root_note=root_note, tempo=tempo) for tip in T["trap_tips"]]
+            st.error(random.choice(tips))
             
         elif genre == "R&B":
-            rb_tips = [
-                f"**De Soulful Sub:** Begin op **{root_note}**, maar blijf daar niet zweven. Wandel via de **{scale}** toonladder langzaam omlaag richting de volgende tel.",
-                f"**Neo-Soul Timing:** Speel je bas extreem zacht (lage velocity) en nét te laat achter de tel (D'Angelo stijl). Dit past perfect bij het {tempo} BPM tempo.",
-                f"**R&B Arp Bass:** Pluk de hoge noten uit je **{root_note}** akkoord en speel ze in het bas-register één voor één af als een trage, zwoele bas-arpeggio."
-            ]
-            st.success(random.choice(rb_tips))
-           
+            tips = [tip.format(scale=scale, root_note=root_note, tempo=tempo) for tip in T["rb_tips"]]
+            st.success(random.choice(tips))
 
-# --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
+        # --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
         st.divider()
-        st.write("### 🎹 Exporteer MIDI Starters")
+        st.write(T["export_title"])
         
-        # We maken nu 3 kolommen!
         btn1, btn2, btn3 = st.columns(3)
         
         with btn1:
             bass_midi_bytes = generate_bassline_midi(data['root_number'], genre, swing_amount)
             st.download_button(
-                label="🎸 Download Baslijn",
+                label=T["btn_bass"],
                 data=bass_midi_bytes,
                 file_name=f"PA_Bass_{genre}_{root_note}.mid",
                 mime="audio/midi",
@@ -433,7 +461,7 @@ if uploaded_file:
         with btn2:
             drum_zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
             st.download_button(
-                label="📦 Download Drum Stems",
+                label=T["btn_drums"],
                 data=drum_zip_bytes,
                 file_name=f"PA_Drum_Stems_{genre}.zip",
                 mime="application/zip",
@@ -443,7 +471,7 @@ if uploaded_file:
         with btn3:
             melody_midi_bytes = generate_melody_midi(data['root_number'], scale, genre, swing_amount)
             st.download_button(
-                label="🎹 Download Melodie",
+                label=T["btn_melody"],
                 data=melody_midi_bytes,
                 file_name=f"PA_Melody_{genre}_{scale}.mid",
                 mime="audio/midi",
