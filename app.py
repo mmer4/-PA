@@ -377,7 +377,8 @@ st.sidebar.link_button(T["feedback_btn"], "https://forms.gle/hfFYLywgzZYjzKDGA")
 # Hoofdscherm
 st.title("🎹 PA: Producer Adviser")
 
-uploaded_file = st.file_uploader(T["drop_midi"], type=['mid'])
+# OPLOSSING 1: Voeg key="midi_upload" toe. Nu onthoudt hij het bestand altijd, ongeacht de taal!
+uploaded_file = st.file_uploader(T["drop_midi"], type=['mid'], key="midi_upload")
 
 if not uploaded_file:
     st.divider()
@@ -393,11 +394,28 @@ if uploaded_file:
     data = analyze_midi_deep(uploaded_file)
     
     if data:
+        # OPLOSSING 2: Onderschep de Nederlandse data en vertaal deze voor we ze laten zien
+        display_reg = data['register']
+        display_scale = data['scale']
+        
+        if lang_choice == "EN":
+            dict_reg = {"Laag": "Low", "Midden": "Mid", "Hoog": "High"}
+            dict_scale = {
+                "Harmonisch Mineur": "Harmonic Minor",
+                "Dorisch": "Dorian",
+                "Natuurlijk Mineur": "Natural Minor",
+                "Mixolydisch": "Mixolydian",
+                "Majeur": "Major",
+                "Complex / Onbekend": "Complex / Unknown"
+            }
+            display_reg = dict_reg.get(display_reg, display_reg)
+            display_scale = dict_scale.get(display_scale, display_scale)
+
         st.markdown(T["analysis_title"])
         m1, m2, m3, m4 = st.columns(4)
         m1.metric("BPM", data['tempo'])
-        m2.metric("Register", data['register']) 
-        m3.metric(T["metric_scale"], f"{data['root_name']} {data['scale']}")
+        m2.metric("Register", display_reg) 
+        m3.metric(T["metric_scale"], f"{data['root_name']} {display_scale}")
         m4.metric(T["metric_notes"], data['notes_count'])
 
         st.divider()
@@ -426,20 +444,19 @@ if uploaded_file:
         st.markdown(T["advice_title"])
         
         root_note = data['root_name']
-        scale = data['scale']
         tempo = data['tempo']
         
-        # --- DYNAMISCHE AI TIPS ---
+        # --- DYNAMISCHE AI TIPS (Hier gebruiken we display_scale voor de tekst) ---
         if genre == "Hiphop":
-            tips = [tip.format(scale=scale, root_note=root_note, tempo=tempo) for tip in T["hiphop_tips"]]
+            tips = [tip.format(scale=display_scale, root_note=root_note, tempo=tempo) for tip in T["hiphop_tips"]]
             st.info(random.choice(tips))
             
         elif genre == "Trap":
-            tips = [tip.format(scale=scale, root_note=root_note, tempo=tempo) for tip in T["trap_tips"]]
+            tips = [tip.format(scale=display_scale, root_note=root_note, tempo=tempo) for tip in T["trap_tips"]]
             st.error(random.choice(tips))
             
         elif genre == "R&B":
-            tips = [tip.format(scale=scale, root_note=root_note, tempo=tempo) for tip in T["rb_tips"]]
+            tips = [tip.format(scale=display_scale, root_note=root_note, tempo=tempo) for tip in T["rb_tips"]]
             st.success(random.choice(tips))
 
         # --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
@@ -469,11 +486,12 @@ if uploaded_file:
             )
             
         with btn3:
-            melody_midi_bytes = generate_melody_midi(data['root_number'], scale, genre, swing_amount)
+            # LET OP: Voor de generator gebruiken we de originele Nederlandse data['scale'] om crashes te voorkomen!
+            melody_midi_bytes = generate_melody_midi(data['root_number'], data['scale'], genre, swing_amount)
             st.download_button(
                 label=T["btn_melody"],
                 data=melody_midi_bytes,
-                file_name=f"PA_Melody_{genre}_{scale}.mid",
+                file_name=f"PA_Melody_{genre}_{display_scale}.mid",
                 mime="audio/midi",
                 use_container_width=True
             )
