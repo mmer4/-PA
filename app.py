@@ -301,24 +301,28 @@ st.markdown("""
 
 
 # Sidebar
+# --- SIDEBAR & TAALKEUZE ---
 try:
-    st.sidebar.image("logo.png", use_container_width=True) # Laadt je geüploade logo in!
+    st.sidebar.image("logo.png", use_container_width=True)
 except:
-    st.sidebar.markdown("# 🎧 PA") # Fallback als het logo even niet laadt
-# Taalkeuze
+    st.sidebar.markdown("# 🎧 PA")
+
 lang_choice = st.sidebar.radio("Language / Taal", ["EN", "NL"], horizontal=True)
-T = LANGUAGES[lang_choice] # T staat nu voor onze actieve vertalingen
+T = LANGUAGES[lang_choice] 
 
 st.sidebar.markdown(T["sidebar_title"])
 st.sidebar.divider()
-st.sidebar.markdown(f"### {T['gen_settings']}")
+
+st.sidebar.markdown(T["gen_settings"])
 genre = st.sidebar.selectbox(T["choose_genre"], ["Hiphop", "R&B", "Trap"])
 
-# --- NIEUW: BETA FEEDBACK KNOP ---
+# HIER ZIJN ZE WEER: De missende variabelen!
+complexity = st.sidebar.selectbox(T["complexity"], ["Basic", "Modern", "Busy"], index=1)
+swing_amount = st.sidebar.slider(T["swing"], min_value=0, max_value=100, value=20, step=5)
+
 st.sidebar.divider()
 st.sidebar.markdown("### 🧪 Beta Tester?")
-st.sidebar.markdown("Help PA beter te maken! Heb je een bug gevonden of een briljante feature bedacht?")
-st.sidebar.link_button("📝 Geef Feedback", "https://forms.gle/rNVhcpMZaq8sAmSg8")
+st.sidebar.link_button(T["feedback_btn"], "https://forms.gle/hfFYLywgzZYjzKDGA")
 # Hoofdscherm
 st.title("🎹 PA: Producer Adviser")
 st.markdown(f"*Jouw AI-gedreven co-producer voor **{genre}**.*")
