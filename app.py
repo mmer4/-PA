@@ -4,7 +4,43 @@ import io
 import pandas as pd
 import random
 import zipfile
-
+# --- TAALINSTELLINGEN ---
+LANGUAGES = {
+    "NL": {
+        "sidebar_title": "### *Producer Adviser v1.0*",
+        "gen_settings": "🎛️ Generator Instellingen",
+        "choose_genre": "Kies je Genre",
+        "complexity": "Drum Complexiteit",
+        "swing": "Swing / Humanize (%)",
+        "drop_midi": "Drop je MIDI-akkoorden hier",
+        "how_it_works": "🚀 Hoe werkt het?",
+        "step1": "**1. Upload je akkoorden**\n\nSleep een .mid bestand met je basisakkoorden in het vak hierboven.",
+        "step2": "**2. Check je frequenties**\n\nPA analyseert je noten op toonsoort, ritme en botsingen.",
+        "step3": "**3. Genereer Stems**\n\nDownload unieke baslijnen, drum stems en melodieën.",
+        "analysis_title": "### 🛠️ Live Analyse",
+        "collision_title": "### ⚠️ Collision Alerts",
+        "advice_title": "### 🤖 AI Co-Producer: Dynamisch Studio Advies",
+        "export_title": "### 🎹 Exporteer MIDI Starters",
+        "feedback_btn": "📝 Geef Feedback"
+    },
+    "EN": {
+        "sidebar_title": "### *Producer Adviser v1.0*",
+        "gen_settings": "🎛️ Generator Settings",
+        "choose_genre": "Choose your Genre",
+        "complexity": "Drum Complexity",
+        "swing": "Swing / Humanize (%)",
+        "drop_midi": "Drop your MIDI chords here",
+        "how_it_works": "🚀 How does it work?",
+        "step1": "**1. Upload your chords**\n\nDrag a .mid file with your base chords into the box above.",
+        "step2": "**2. Check your frequencies**\n\nPA analyzes your notes for key, rhythm, and collisions.",
+        "step3": "**3. Generate Stems**\n\nDownload unique basslines, drum stems, and melodies.",
+        "analysis_title": "### 🛠️ Live Analysis",
+        "collision_title": "### ⚠️ Collision Alerts",
+        "advice_title": "### 🤖 AI Co-Producer: Dynamic Studio Advice",
+        "export_title": "### 🎹 Export MIDI Starters",
+        "feedback_btn": "📝 Give Feedback"
+    }
+}
 # --- FUNCTIE 1: FREQUENTIE DATA ---
 def get_note_name(midi_number):
     # Lijst van alle 12 muzieknoten
