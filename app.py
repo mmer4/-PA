@@ -276,7 +276,11 @@ genre = st.sidebar.selectbox("Kies je Genre", ["Hiphop", "R&B", "Trap"])
 complexity = st.sidebar.selectbox("Drum Complexiteit", ["Basic (Alleen basis)", "Modern (Standaard)", "Busy (Rolls & Ghostnotes)"], index=1)
 swing_amount = st.sidebar.slider("Swing / Humanize (%)", min_value=0, max_value=100, value=20, step=5)
 st.sidebar.info("💡 **Tip:** Zet Swing op 0% voor strakke elektronische beats, of op 80% voor een slepende J Dilla of Lo-Fi groove.")
-
+# --- NIEUW: BETA FEEDBACK KNOP ---
+st.sidebar.divider()
+st.sidebar.markdown("### 🧪 Beta Tester?")
+st.sidebar.markdown("Help PA beter te maken! Heb je een bug gevonden of een briljante feature bedacht?")
+st.sidebar.link_button("📝 Geef Feedback", "https://forms.gle/rNVhcpMZaq8sAmSg8")
 # Hoofdscherm
 st.title("🎹 PA: Producer Adviser")
 st.markdown(f"*Jouw AI-gedreven co-producer voor **{genre}**.*")
