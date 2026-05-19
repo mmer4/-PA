@@ -427,7 +427,46 @@ if uploaded_file:
         m2.metric("Register", display_reg) 
         m3.metric(T["metric_scale"], f"{data['root_name']} {display_scale}")
         m4.metric(T["metric_notes"], data['notes_count'])
+# --- OVERRIDE MENU VOOR DE CONTROL FREAKS ---
+        with st.expander("⚙️ Override AI Analyse (Handmatig Aanpassen)"):
+            c1, c2, c3 = st.columns(3)
+            
+            # 1. Snelheid Override
+            try:
+                huidig_tempo = int(data['tempo'])
+            except:
+                huidig_tempo = 120
+            manual_bpm = c1.number_input("Snelheid (BPM)", min_value=40, max_value=250, value=huidig_tempo)
+            
+            # 2. Grondtoon Override
+            noten_lijst = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+            huidige_noot_index = noten_lijst.index(data['root_name']) if data['root_name'] in noten_lijst else 0
+            manual_root = c2.selectbox("Grondtoon", noten_lijst, index=huidige_noot_index)
+            
+            # 3. Toonladder Override
+            toonladders = ["Majeur", "Natuurlijk Mineur", "Harmonisch Mineur", "Dorisch", "Mixolydisch"]
+            huidige_ladder_index = toonladders.index(data['scale']) if data['scale'] in toonladders else 0
+            manual_scale = c3.selectbox("Toonladder", toonladders, index=huidige_ladder_index)
 
+            # Overschrijf de AI data met de handmatige keuzes!
+            # Alles wat hierna komt (de tips en de MIDI generator) gebruikt nu deze waardes.
+            data['tempo'] = manual_bpm
+            data['root_name'] = manual_root
+            data['root_number'] = noten_lijst.index(manual_root)
+            data['scale'] = manual_scale
+            
+            # Pas ook de display variabelen voor de rest van het scherm aan
+            display_scale = manual_scale
+            if lang_choice == "EN":
+                dict_scale = {
+                    "Harmonisch Mineur": "Harmonic Minor",
+                    "Dorisch": "Dorian",
+                    "Natuurlijk Mineur": "Natural Minor",
+                    "Mixolydisch": "Mixolydian",
+                    "Majeur": "Major",
+                    "Complex / Onbekend": "Complex / Unknown"
+                }
+                display_scale = dict_scale.get(manual_scale, manual_scale)
         st.divider()
         col_left, col_right = st.columns([2, 1])
 
