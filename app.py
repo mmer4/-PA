@@ -205,15 +205,23 @@ def generate_bassline_midi(root_number, genre, swing_amount):
     for bar in range(4):
         offset = bar * 4 
         if genre == "Trap":
-            add_hit(events, b, offset + 0, 1.0, 127, 0, swing_amount) 
-            add_hit(events, b, offset + 1.5, 0.5, 120, 0, swing_amount) 
-            if bar == 3: add_hit(events, b + 12, offset + 3.5, 0.5, 120, 0, swing_amount) 
-            elif bar % 2 == 1: add_hit(events, b, offset + 3.5, 0.5, 110, 0, swing_amount)
+            # LEGATO FIX: Noten sluiten nu naadloos op elkaar aan zonder te overlappen.
+            # Start 0, lengte 1.5 (raakt exact de volgende noot op 1.5)
+            add_hit(events, b, offset + 0, 1.5, 127, 0, swing_amount) 
+            # Start 1.5, lengte 2.0 (raakt exact de volgende noot op 3.5)
+            add_hit(events, b, offset + 1.5, 2.0, 120, 0, swing_amount) 
+            
+            # De befaamde 808 octaaf-slide!
+            if bar == 3: 
+                add_hit(events, b + 12, offset + 3.5, 0.5, 120, 0, swing_amount) 
+            elif bar % 2 == 1: 
+                add_hit(events, b, offset + 3.5, 0.5, 110, 0, swing_amount)
+                
         elif genre == "Hiphop":
             add_hit(events, b, offset + 0, 1.5, 110, 0, swing_amount)
             add_hit(events, b, offset + 2.5, 1.0, 100, 0, swing_amount) 
             if bar == 3: add_hit(events, b + 7, offset + 3.5, 0.5, 90, 0, swing_amount) 
-        else: 
+        else: # R&B
             add_hit(events, b, offset + 0, 3.0, 100, 0, swing_amount) 
             if bar == 3: 
                 add_hit(events, b - 1, offset + 3.0, 0.5, 90, 0, swing_amount) 
@@ -227,7 +235,6 @@ def generate_drum_zip(genre, complexity, swing_amount):
     for bar in range(4):
         offset = bar * 4
         
-        # COMPLEXITY: Basic heeft GEEN hihats, Modern heeft standaard, Busy heeft rolls
         is_basic = "Basic" in complexity
         is_busy = "Busy" in complexity
         
@@ -236,9 +243,10 @@ def generate_drum_zip(genre, complexity, swing_amount):
                 for i in range(8):
                     beat_pos = offset + (i * 0.5)
                     if is_busy and i % 2 == 1 and random.random() > 0.6:
+                        # MATH FIX: Gebruik pure breuken (1/6 en 1/3) voor perfecte triolen in elke DAW
                         add_hit(events, h, beat_pos, 0.1, 110, 9, swing_amount)
-                        add_hit(events, h, beat_pos + 0.166, 0.1, 90, 9, swing_amount)
-                        add_hit(events, h, beat_pos + 0.333, 0.1, 80, 9, swing_amount)
+                        add_hit(events, h, beat_pos + (1/6), 0.1, 90, 9, swing_amount)
+                        add_hit(events, h, beat_pos + (1/3), 0.1, 80, 9, swing_amount)
                     else:
                         add_hit(events, h, beat_pos, 0.1, 100, 9, swing_amount)
 
