@@ -467,6 +467,29 @@ if uploaded_file:
                     "Complex / Onbekend": "Complex / Unknown"
                 }
                 display_scale = dict_scale.get(manual_scale, manual_scale)
+# --- 🤖 AI UITLEG: TOONSOORTEN (Voor Beginners) ---
+        with st.expander("🤖 AI Uitleg: Wat betekent deze Toonladder?"):
+            if lang_choice == "NL":
+                st.write(f"Je akkoorden staan in **{display_scale}**.")
+                if "Majeur" in display_scale:
+                    st.info("💡 **Vibe:** Vrolijk, hoopvol en energiek. Veel pop, house en vrolijke hiphop (denk aan Mac Miller) gebruikt deze toonladder.")
+                elif "Mineur" in display_scale:
+                    st.info("💡 **Vibe:** Droevig, donker, of emotioneel. Dit is de gouden standaard voor Trap, Drill en melancholische R&B.")
+                elif "Dorisch" in display_scale:
+                    st.info("💡 **Vibe:** Dromerig en jazzy. Het lijkt op mineur, maar heeft één noot die het net wat lichter en zwevender maakt.")
+                else:
+                    st.info("💡 **Vibe:** Een unieke of exotische klankkleur. Probeer hierboven handmatig een andere toonsoort te kiezen als je melodieën wilt forceren.")
+            else: # Engels
+                st.write(f"Your chords are in **{display_scale}**.")
+                if "Major" in display_scale:
+                    st.info("💡 **Vibe:** Happy, hopeful, and energetic. A lot of pop, house, and upbeat hip-hop use this scale.")
+                elif "Minor" in display_scale:
+                    st.info("💡 **Vibe:** Sad, dark, or emotional. This is the gold standard for Trap, Drill, and melancholic R&B.")
+                elif "Dorian" in display_scale:
+                    st.info("💡 **Vibe:** Dreamy and jazzy. It's like minor but with a slightly brighter, floating feel.")
+                else:
+                    st.info("💡 **Vibe:** A unique or exotic tone. Try manually overriding the scale above if you want to experiment with melodies.")
+        
         st.divider()
         col_left, col_right = st.columns([2, 1])
 
@@ -488,6 +511,16 @@ if uploaded_file:
                 st.warning(T["sub_warn"])
             else:
                 st.success(T["clean_mix"])
+                # --- 🤖 AI UITLEG: FREQUENTIES (Voor Beginners) ---
+            with st.expander("🤖 AI Uitleg: Frequenties & Modder"):
+                if lang_choice == "NL":
+                    st.write("**Waarom checken we op 'Modder'?**")
+                    st.write("Geluid is ruimte. Tussen de **250Hz en 500Hz** (het 'Low-Mid' gebied) klinkt audio heel dik en warm. Maar als je baslijn, je akkoorden én je kick-drum allemaal in datzelfde gebied spelen, ontstaat er 'frequentie-file'.")
+                    st.info("🔧 **Pro-Tip:** Hoor je een modderige mix? Pak een EQ-plugin in je DAW en haal bij je akkoorden-synth een paar decibel weg rond de 300Hz. Je zult horen dat je kickdrum opeens veel harder doorkomt!")
+                else:
+                    st.write("**Why do we check for 'Mud'?**")
+                    st.write("Sound is space. Between **250Hz and 500Hz** (the 'Low-Mid' area), audio sounds thick and warm. But if your bassline, your chords, and your kick drum all play in that same area, you get a 'frequency traffic jam'.")
+                    st.info("🔧 **Pro-Tip:** Got a muddy mix? Put an EQ plugin on your chord synth and cut a few decibels around 300Hz. You'll hear your kick drum suddenly punch through a lot harder!")
             
         st.divider()
         st.markdown(T["advice_title"])
