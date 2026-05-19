@@ -326,24 +326,26 @@ def generate_melody_midi(root_number, scale_type, genre, swing_amount):
             # Snelle, repetitieve hoge melodie (plucks/bells)
             for i in range(8):
                 if random.random() > 0.4: # 60% kans op een noot
-                    # Kies willekeurig de grondtoon, de terts of de kwint
                     note = random.choice([safe_notes[0], safe_notes[2], safe_notes[4], safe_notes[0]+12])
-                    # Zet hem nog een octaaf hoger (+12) voor die Trap bell vibe
-                    add_hit(events, note + 12, offset + (i * 0.5), 0.25, random.randint(90, 110), 0, swing_amount)
+                    # LEGATO FIX: Lengte veranderd van 0.25 naar 0.5. 
+                    # De blokken sluiten nu perfect op elkaar aan in de DAW.
+                    add_hit(events, note + 12, offset + (i * 0.5), 0.5, random.randint(90, 110), 0, swing_amount)
                     
         elif genre == "Hiphop":
-            # Meer jazzy, gesyncopeerde timing met meer ademruimte
-            if random.random() > 0.3: add_hit(events, safe_notes[0], offset + 0, 0.5, 100, 0, swing_amount)
-            if random.random() > 0.5: add_hit(events, safe_notes[2], offset + 1.5, 0.5, 90, 0, swing_amount)
-            if random.random() > 0.3: add_hit(events, safe_notes[4], offset + 2.5, 0.5, 95, 0, swing_amount)
-            if bar % 2 == 1: add_hit(events, safe_notes[6] - 12, offset + 3.5, 0.5, 80, 0, swing_amount) # Jazzy loopje
+            # LEGATO FIX: Lengtes opgerekt (1.5, 1.0, 1.0) zodat ze exact aansluiten 
+            # op het moment dat de volgende noot kán vallen. Geen onverwachte stiltes meer.
+            if random.random() > 0.3: add_hit(events, safe_notes[0], offset + 0, 1.5, 100, 0, swing_amount)
+            if random.random() > 0.5: add_hit(events, safe_notes[2], offset + 1.5, 1.0, 90, 0, swing_amount)
+            if random.random() > 0.3: add_hit(events, safe_notes[4], offset + 2.5, 1.0, 95, 0, swing_amount)
+            if bar % 2 == 1: add_hit(events, safe_notes[6] - 12, offset + 3.5, 0.5, 80, 0, swing_amount) 
                 
         else: # R&B
             # Gladde, langzame arpeggio's die door de akkoorden heen rollen
+            # (Deze was al perfect gecodeerd, lengtes en posities sluiten naadloos aan)
             add_hit(events, safe_notes[0], offset + 0, 1.0, 90, 0, swing_amount)
             add_hit(events, safe_notes[2], offset + 1.0, 1.0, 85, 0, swing_amount)
             add_hit(events, safe_notes[4], offset + 2.0, 1.0, 80, 0, swing_amount)
-            add_hit(events, safe_notes[0]+12, offset + 3.0, 1.0, 75, 0, swing_amount) # Octaaf sprong omhoog
+            add_hit(events, safe_notes[0]+12, offset + 3.0, 1.0, 75, 0, swing_amount) 
 
     return schrijf_midi_events(events)
 
