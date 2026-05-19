@@ -351,14 +351,37 @@ def generate_melody_midi(root_number, scale_type, genre, swing_amount):
 
  
 # --- INTERFACE CONFIGURATIE (De nieuwe UX) ---
-st.set_page_config(page_title="PA | Producer Adviser", page_icon="🎧", layout="wide", initial_sidebar_state="expanded")
-# Custom CSS voor de "Dark Mode VST-vibe"
+st.set_page_config(page_title="PA | AI Co-Producer", layout="wide", page_icon="🎹")
+
+# Custom CSS voor een "Studio" vibe
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; }
-    .stMetric { background-color: #1f2937; padding: 15px; border-radius: 10px; border: 1px solid #374151; }
+    /* Maak de achtergrond donkerder (als de gebruiker dark-mode heeft) */
+    .stApp {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Grote, sexy Hero Titel */
+    .hero-title {
+        font-size: 3.5rem !important;
+        font-weight: 800;
+        background: -webkit-linear-gradient(45deg, #FF4B4B, #FF904B);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    
+    /* Subtitel styling */
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #888888;
+        margin-top: 0px !important;
+        padding-top: 0px !important;
+        margin-bottom: 30px;
+    }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 
 # Sidebar
@@ -385,20 +408,33 @@ st.sidebar.divider()
 st.sidebar.markdown("### 🧪 Beta Tester?")
 st.sidebar.link_button(T["feedback_btn"], "https://forms.gle/hfFYLywgzZYjzKDGA")
 # Hoofdscherm
-st.title("🎹 PA: Producer Adviser")
+st.markdown('<h1 class="hero-title">Producer Adviser</h1>', unsafe_allow_html=True)
 
-# OPLOSSING 1: Voeg key="midi_upload" toe. Nu onthoudt hij het bestand altijd, ongeacht de taal!
-uploaded_file = st.file_uploader(T["drop_midi"], type=['mid'], key="midi_upload")
+if lang_choice == "NL":
+    st.markdown('<p class="hero-subtitle">Jouw AI-gedreven co-producer. Upload je akkoorden en ontgrendel wiskundig perfecte baslijnen en drums.</p>', unsafe_allow_html=True)
+else:
+    st.markdown('<p class="hero-subtitle">Your AI-driven co-producer. Upload your chords and unlock mathematically perfect basslines and drums.</p>', unsafe_allow_html=True)
+
+st.divider()
+
+# De Upload Sectie (Gecentreerd en groter)
+st.markdown(f"### 📥 {T['drop_midi']}")
+uploaded_file = st.file_uploader("", type=['mid'], key="midi_upload")
 
 if not uploaded_file:
-    st.divider()
-    st.markdown(f"### 🚀 {T['how_it_works']}")
+    # Maak het startscherm visueel interessanter als er nog niks geüpload is
+    st.write("")
+    st.write("")
     
-    col1, col2, col3 = st.columns(3)
-    col1.info(T["step1"])
-    col2.warning(T["step2"])
-    col3.success(T["step3"])
-
+    col_left, col_center, col_right = st.columns([1, 2, 1])
+    
+    with col_center:
+        st.info(f"🚀 **{T['how_it_works']}**")
+        st.markdown(f"""
+        1️⃣ **{T['step1']}**  
+        2️⃣ **{T['step2']}**  
+        3️⃣ **{T['step3']}**
+        """)
 # --- START ANALYSE (Als er wél iets is geüpload) ---
 if uploaded_file:
     data = analyze_midi_deep(uploaded_file)
