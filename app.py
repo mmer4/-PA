@@ -4,8 +4,9 @@ import io
 import pandas as pd
 import random
 import zipfile
-# --- TAALINSTELLINGEN ---
-# --- TAALINSTELLINGEN ---
+
+# TAALINSTELLINGEN
+
 LANGUAGES = {
     "NL": {
         "sidebar_title": "### *Producer Adviser v1.0*",
@@ -92,9 +93,9 @@ LANGUAGES = {
         "btn_melody": "🎹 Download Melody"
     }
 }
-# --- FUNCTIE 1: FREQUENTIE DATA ---
+#  FREQUENTIE DATA 
 def get_note_name(midi_number):
-    # Lijst van alle 12 muzieknoten
+    
     NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     return NOTES[midi_number % 12]
 
@@ -114,7 +115,7 @@ def get_frequency_data(notes):
         else: data["6. High (4kHz+)"] += 1
     return pd.DataFrame(list(data.items()), columns=['Gebied', 'Aantal Noten'])
 
-# --- FUNCTIE 2: ANALYSE ENGINE ---
+# ANALYSE ENGINE
 def analyze_midi_deep(uploaded_file):
     try:
         uploaded_file.seek(0)
@@ -135,7 +136,7 @@ def analyze_midi_deep(uploaded_file):
         root_name = get_note_name(root) # Hier leert PA de naam van het akkoord
         intervals = [(n - root) % 12 for n in unique_notes]
 
-       # --- NIEUW: GEAVANCEERDE TOONLADDER DETECTIE ---
+       # GEAVANCEERDE TOONLADDER DETECTIE
         scale_type = "Complex / Onbekend"
         if 3 in intervals: # Mineur basis
             if 11 in intervals: scale_type = "Harmonisch Mineur"
@@ -155,7 +156,7 @@ def analyze_midi_deep(uploaded_file):
             "tempo": round(tempo, 1),
             "register": register,
             "vibe": vibe_type,
-            "scale": scale_type, # De exacte toonladder wordt nu onthouden
+            "scale": scale_type, 
             "notes": notes,
             "notes_count": len(notes),
             "root_name": root_name,
@@ -164,9 +165,9 @@ def analyze_midi_deep(uploaded_file):
     except Exception as e:
         return None
 
-# --- FUNCTIE 3 & 4: PRO MIDI SEQUENCERS (4 BARS) ---
+# PRO MIDI SEQUENCERS (4 BARS)
 def schrijf_midi_events(events):
-    # Een slimme 'engine' om overlappende noten naar MIDI delta-tijd om te zetten
+   
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     mid.tracks.append(track)
@@ -181,14 +182,14 @@ def schrijf_midi_events(events):
     return file_buffer.getvalue()
 
 def add_hit(events, note, beat, duration_beats=0.25, velocity=100, channel=0, swing_amount=0):
-    # --- NIEUW: HUMANIZE ENGINE ---
+    # HUMANIZE ENGINE 
     shift = 0
     if swing_amount > 0:
-        # Verschuif de timing een fractie (hoe hoger de swing, hoe losser)
+        
         max_shift = (swing_amount / 100.0) * 0.06 
         shift = random.uniform(-max_shift, max_shift)
         
-        # Varieer de aanslagkracht (velocity) voor een menselijk gevoel
+      
         vel_var = int((swing_amount / 100.0) * 20)
         velocity = max(1, min(127, velocity + random.randint(-vel_var, vel_var)))
 
@@ -205,13 +206,13 @@ def generate_bassline_midi(root_number, genre, swing_amount):
     for bar in range(4):
         offset = bar * 4 
         if genre == "Trap":
-            # LEGATO FIX: Noten sluiten nu naadloos op elkaar aan zonder te overlappen.
-            # Start 0, lengte 1.5 (raakt exact de volgende noot op 1.5)
+            # LEGATO FIX
+    
             add_hit(events, b, offset + 0, 1.5, 127, 0, swing_amount) 
-            # Start 1.5, lengte 2.0 (raakt exact de volgende noot op 3.5)
+            
             add_hit(events, b, offset + 1.5, 2.0, 120, 0, swing_amount) 
             
-            # De befaamde 808 octaaf-slide!
+            
             if bar == 3: 
                 add_hit(events, b + 12, offset + 3.5, 0.5, 120, 0, swing_amount) 
             elif bar % 2 == 1: 
@@ -221,7 +222,7 @@ def generate_bassline_midi(root_number, genre, swing_amount):
             add_hit(events, b, offset + 0, 1.5, 110, 0, swing_amount)
             add_hit(events, b, offset + 2.5, 1.0, 100, 0, swing_amount) 
             if bar == 3: add_hit(events, b + 7, offset + 3.5, 0.5, 90, 0, swing_amount) 
-        else: # R&B
+        else: 
             add_hit(events, b, offset + 0, 3.0, 100, 0, swing_amount) 
             if bar == 3: 
                 add_hit(events, b - 1, offset + 3.0, 0.5, 90, 0, swing_amount) 
@@ -243,7 +244,7 @@ def generate_drum_zip(genre, complexity, swing_amount):
                 for i in range(8):
                     beat_pos = offset + (i * 0.5)
                     if is_busy and i % 2 == 1 and random.random() > 0.6:
-                        # MATH FIX: Gebruik pure breuken (1/6 en 1/3) voor perfecte triolen in elke DAW
+                        # MATH FIX
                         add_hit(events, h, beat_pos, 0.1, 110, 9, swing_amount)
                         add_hit(events, h, beat_pos + (1/6), 0.1, 90, 9, swing_amount)
                         add_hit(events, h, beat_pos + (1/3), 0.1, 80, 9, swing_amount)
@@ -274,7 +275,7 @@ def generate_drum_zip(genre, complexity, swing_amount):
                     add_hit(events, s, offset + 3.75, velocity=55, channel=9, swing_amount=swing_amount)
                     add_hit(events, k, offset + 3.5, velocity=70, channel=9, swing_amount=swing_amount)
                 
-        else: # R&B
+        else: 
             if not is_basic:
                 for i in range(16): 
                     vel = 85 if i % 4 == 0 else (65 if i % 2 == 0 else 45)
@@ -305,30 +306,30 @@ def generate_drum_zip(genre, complexity, swing_amount):
 
 def generate_melody_midi(root_number, scale_type, genre, swing_amount):
     events = []
-    # Zet de melodie in een hoger octaaf (octaaf 5, rond MIDI noot 72)
+    
     base_note = 60 + (root_number % 12) 
     
-    # Bepaal de veilige afstanden (intervallen) op basis van de ontdekte toonladder
-    intervals = [0, 2, 4, 5, 7, 9, 11] # Standaard Majeur
+    
+    intervals = [0, 2, 4, 5, 7, 9, 11] 
     if "Mineur" in scale_type:
         if "Harmonisch" in scale_type: intervals = [0, 2, 3, 5, 7, 8, 11]
-        else: intervals = [0, 2, 3, 5, 7, 8, 10] # Natuurlijk Mineur
+        else: intervals = [0, 2, 3, 5, 7, 8, 10] 
     elif scale_type == "Dorisch": intervals = [0, 2, 3, 5, 7, 9, 10]
     elif scale_type == "Mixolydisch": intervals = [0, 2, 4, 5, 7, 9, 10]
     
-    # Genereer een lijst met 100% zuivere noten
+    
     safe_notes = [base_note + i for i in intervals]
     
     for bar in range(4):
         offset = bar * 4
         
         if genre == "Trap":
-            # Snelle, repetitieve hoge melodie (plucks/bells)
+            
             for i in range(8):
-                if random.random() > 0.4: # 60% kans op een noot
+                if random.random() > 0.4: 
                     note = random.choice([safe_notes[0], safe_notes[2], safe_notes[4], safe_notes[0]+12])
                     # LEGATO FIX: Lengte veranderd van 0.25 naar 0.5. 
-                    # De blokken sluiten nu perfect op elkaar aan in de DAW.
+                
                     add_hit(events, note + 12, offset + (i * 0.5), 0.5, random.randint(90, 110), 0, swing_amount)
                     
         elif genre == "Hiphop":
@@ -340,8 +341,6 @@ def generate_melody_midi(root_number, scale_type, genre, swing_amount):
             if bar % 2 == 1: add_hit(events, safe_notes[6] - 12, offset + 3.5, 0.5, 80, 0, swing_amount) 
                 
         else: # R&B
-            # Gladde, langzame arpeggio's die door de akkoorden heen rollen
-            # (Deze was al perfect gecodeerd, lengtes en posities sluiten naadloos aan)
             add_hit(events, safe_notes[0], offset + 0, 1.0, 90, 0, swing_amount)
             add_hit(events, safe_notes[2], offset + 1.0, 1.0, 85, 0, swing_amount)
             add_hit(events, safe_notes[4], offset + 2.0, 1.0, 80, 0, swing_amount)
@@ -384,8 +383,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Sidebar
-# --- SIDEBAR & TAALKEUZE ---
+
+#  SIDEBAR & TAALKEUZE 
 try:
     st.sidebar.image("logo.png", use_container_width=True)
 except:
@@ -400,7 +399,7 @@ st.sidebar.divider()
 st.sidebar.markdown(T["gen_settings"])
 genre = st.sidebar.selectbox(T["choose_genre"], ["Hiphop", "R&B", "Trap"])
 
-# HIER ZIJN ZE WEER: De missende variabelen!
+
 complexity = st.sidebar.selectbox(T["complexity"], ["Basic", "Modern", "Busy"], index=1)
 swing_amount = st.sidebar.slider(T["swing"], min_value=0, max_value=100, value=20, step=5)
 
@@ -417,12 +416,12 @@ else:
 
 st.divider()
 
-# De Upload Sectie (Gecentreerd en groter)
+#  Upload Sectie 
 st.markdown(f"### 📥 {T['drop_midi']}")
 uploaded_file = st.file_uploader("", type=['mid'], key="midi_upload")
 
 if not uploaded_file:
-    # Maak het startscherm visueel interessanter als er nog niks geüpload is
+   
     st.write("")
     st.write("")
     
@@ -435,12 +434,12 @@ if not uploaded_file:
         2️⃣ **{T['step2']}**  
         3️⃣ **{T['step3']}**
         """)
-# --- START ANALYSE (Als er wél iets is geüpload) ---
+# START ANALYSE 
 if uploaded_file:
     data = analyze_midi_deep(uploaded_file)
     
     if data:
-        # OPLOSSING 2: Onderschep de Nederlandse data en vertaal deze voor we ze laten zien
+        
         display_reg = data['register']
         display_scale = data['scale']
         
@@ -463,7 +462,7 @@ if uploaded_file:
         m2.metric("Register", display_reg) 
         m3.metric(T["metric_scale"], f"{data['root_name']} {display_scale}")
         m4.metric(T["metric_notes"], data['notes_count'])
-# --- OVERRIDE MENU VOOR DE CONTROL FREAKS ---
+#  OVERRIDE MENU VOOR DE CONTROL FREAKS 
         with st.expander("⚙️ Override AI Analyse (Handmatig Aanpassen)"):
             c1, c2, c3 = st.columns(3)
             
@@ -484,14 +483,13 @@ if uploaded_file:
             huidige_ladder_index = toonladders.index(data['scale']) if data['scale'] in toonladders else 0
             manual_scale = c3.selectbox("Toonladder", toonladders, index=huidige_ladder_index)
 
-            # Overschrijf de AI data met de handmatige keuzes!
-            # Alles wat hierna komt (de tips en de MIDI generator) gebruikt nu deze waardes.
+           
             data['tempo'] = manual_bpm
             data['root_name'] = manual_root
             data['root_number'] = noten_lijst.index(manual_root)
             data['scale'] = manual_scale
             
-            # Pas ook de display variabelen voor de rest van het scherm aan
+           
             display_scale = manual_scale
             if lang_choice == "EN":
                 dict_scale = {
@@ -503,7 +501,7 @@ if uploaded_file:
                     "Complex / Onbekend": "Complex / Unknown"
                 }
                 display_scale = dict_scale.get(manual_scale, manual_scale)
-# --- 🤖 AI UITLEG: TOONSOORTEN (Voor Beginners) ---
+#  🤖 AI UITLEG: TOONSOORTEN 
         with st.expander("🤖 AI Uitleg: Wat betekent deze Toonladder?"):
             if lang_choice == "NL":
                 st.write(f"Je akkoorden staan in **{display_scale}**.")
@@ -547,7 +545,7 @@ if uploaded_file:
                 st.warning(T["sub_warn"])
             else:
                 st.success(T["clean_mix"])
-                # --- 🤖 AI UITLEG: FREQUENTIES (Voor Beginners) ---
+                #  🤖 AI UITLEG: FREQUENTIES 
             with st.expander("🤖 AI Uitleg: Frequenties & Modder"):
                 if lang_choice == "NL":
                     st.write("**Waarom checken we op 'Modder'?**")
@@ -564,7 +562,7 @@ if uploaded_file:
         root_note = data['root_name']
         tempo = data['tempo']
         
-        # --- DYNAMISCHE AI TIPS (Hier gebruiken we display_scale voor de tekst) ---
+        #  DYNAMISCHE AI TIPS 
         if genre == "Hiphop":
             tips = [tip.format(scale=display_scale, root_note=root_note, tempo=tempo) for tip in T["hiphop_tips"]]
             st.info(random.choice(tips))
@@ -577,7 +575,7 @@ if uploaded_file:
             tips = [tip.format(scale=display_scale, root_note=root_note, tempo=tempo) for tip in T["rb_tips"]]
             st.success(random.choice(tips))
 
-        # --- DE MAGIC BUTTONS: EXPORTEER MIDI ---
+        #  EXPORTEER MIDI
         st.divider()
         st.write(T["export_title"])
         
@@ -604,7 +602,7 @@ if uploaded_file:
             )
             
         with btn3:
-            # LET OP: Voor de generator gebruiken we de originele Nederlandse data['scale'] om crashes te voorkomen!
+          
             melody_midi_bytes = generate_melody_midi(data['root_number'], data['scale'], genre, swing_amount)
             st.download_button(
                 label=T["btn_melody"],
