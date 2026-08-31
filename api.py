@@ -280,15 +280,13 @@ async def analyze_midi(file: UploadFile = File(...)):
 # 🚪 DE API LOKETTEN (ENDPOINTS)
 # ==========================================
 
-app = FastAPI(title="Producer Adviser API", version="1.0")
-
 @app.get("/")
 def read_root():
     return {"status": "PA Server is online 🟢", "message": "De theorie-engine draait."}
 
 # 1. HET ANALYSE LOKET (POST)
 @app.post("/analyze")
-    async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
+async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
     file_bytes = await file.read()
     
     # Voer de theorie-engine uit
@@ -309,30 +307,30 @@ def read_root():
 
 # 2. BASLIJN GENERATOR LOKET (GET)
 @app.get("/generate/bass")
-    def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
-        midi_bytes = generate_bassline_midi(root_number, genre, swing_amount)
-        return Response(
-            content=midi_bytes,
-            media_type="audio/midi",
-            headers={"Content-Disposition": f"attachment; filename=PA_Bass_{genre}.mid"}  # Deze regel forceert de download!
-        )
+def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
+    midi_bytes = generate_bassline_midi(root_number, genre, swing_amount)
+    return Response(
+        content=midi_bytes,
+        media_type="audio/midi",
+        headers={"Content-Disposition": f"attachment; filename=PA_Bass_{genre}.mid"}
+    )
 
 # 3. MELODIE GENERATOR LOKET (GET)
 @app.get("/generate/melody")
-    def generate_melody_endpoint(root_number: int, scale_type: str, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
-        midi_bytes = generate_melody_midi(root_number, scale_type, genre, swing_amount)
-        return Response(
-            content=midi_bytes, 
-            media_type="audio/midi",
-            headers={"Content-Disposition": f"attachment; filename=PA_Melody_{genre}.mid"}
-        )
+def generate_melody_endpoint(root_number: int, scale_type: str, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
+    midi_bytes = generate_melody_midi(root_number, scale_type, genre, swing_amount)
+    return Response(
+        content=midi_bytes, 
+        media_type="audio/midi",
+        headers={"Content-Disposition": f"attachment; filename=PA_Melody_{genre}.mid"}
+    )
 
 # 4. DRUM STEMS GENERATOR LOKET (GET)
 @app.get("/generate/drums")
-    def generate_drums_endpoint(genre: str, complexity: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
-        zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
-        return Response(
-            content=zip_bytes, 
-            media_type="application/zip",
-            headers={"Content-Disposition": f"attachment; filename=PA_Drums_{genre}.zip"}
-        )
+def generate_drums_endpoint(genre: str, complexity: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
+    zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
+    return Response(
+        content=zip_bytes, 
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename=PA_Drums_{genre}.zip"}
+    )
