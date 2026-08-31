@@ -286,7 +286,7 @@ def read_root():
 
 # 1. HET ANALYSE LOKET (POST)
 @app.post("/analyze")
-    async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
+async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
         file_bytes = await file.read()
         
         # Voer de theorie-engine uit
