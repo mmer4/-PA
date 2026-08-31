@@ -6,7 +6,24 @@ import io
 import random
 import zipfile
 
+app = FastAPI(title="Producer Adviser API", version="1.0")
 
+# ==========================================
+# 🔒 API BEVEILIGING
+# ==========================================
+API_KEY_NAME = "X-API-KEY"
+VALID_API_KEY = os.environ.get("PA_API_KEY", "super-geheime-test-sleutel-123") 
+api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
+
+async def check_api_key(api_key: str = Security(api_key_header)):
+    if api_key != VALID_API_KEY:
+        raise HTTPException(status_code=403, detail="Toegang geweigerd: Ongeldige of ontbrekende API sleutel.")
+    return api_key
+
+
+# ==========================================
+# 🧠 DE HERSENS (THEORIE & GENERATOREN)
+# ==========================================
 
 def get_note_name(midi_number):
     NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -26,8 +43,6 @@ def get_frequency_data(notes):
         elif f < 2000: data["4. Mid (500-2kHz)"] += 1
         elif f < 4000: data["5. High-Mid (2k-4kHz)"] += 1
         else: data["6. High (4kHz+)"] += 1
-    
-    
     return data
 
 def analyze_midi_deep(file_bytes):
@@ -234,48 +249,8 @@ def generate_melody_midi(root_number, scale_type, genre, swing_amount):
             add_hit(events, safe_notes[0]+12, offset + 3.0, 1.0, 75, 0, swing_amount) 
 
     return schrijf_midi_events(events)
-app = FastAPI(title="Producer Adviser API", version="1.0")
 
 
-API_KEY_NAME = "X-API-KEY"
-
-
-VALID_API_KEY = os.environ.get("PA_API_KEY", "super-geheime-test-sleutel-123") 
-
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
-
-async def check_api_key(api_key: str = Security(api_key_header)):
-    if api_key != VALID_API_KEY:
-        raise HTTPException(status_code=403, detail="Toegang geweigerd: Ongeldige of ontbrekende API sleutel.")
-    return api_key
-@app.get("/")
-def read_root():
-    return {"status": "PA Server is online 🟢"}
-
-# --- NIEUW: Het Analyse Loket ---
-@app.post("/analyze")
-async def analyze_midi(file: UploadFile = File(...)):
-    # 1. Lees het binnengekomen bestand in het werkgeheugen
-    file_bytes = await file.read()
-    
-    # 2. Laat Mido het lezen alsof het een echt bestand is (zonder op te slaan)
-    midi_data = mido.MidiFile(file=io.BytesIO(file_bytes))
-    
-    # 3. Zoek even snel het tempo (als test)
-    tempo = 120
-    for track in midi_data.tracks:
-        for msg in track:
-            if msg.type == 'set_tempo':
-                tempo = round(mido.tempo2bpm(msg.tempo))
-                break
-
-    # 4. Stuur het antwoord terug als pure JSON data
-    return {
-        "bestandsnaam": file.filename,
-        "gevonden_tempo": tempo,
-        "aantal_tracks": len(midi_data.tracks),
-        "status": "Succesvol uitgelezen door de API!"
-    }
 # ==========================================
 # 🚪 DE API LOKETTEN (ENDPOINTS)
 # ==========================================
@@ -287,30 +262,30 @@ def read_root():
 # 1. HET ANALYSE LOKET (POST)
 @app.post("/analyze")
 async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
-        file_bytes = await file.read()
+    file_bytes = await file.read()
+    
+    # Voer de theorie-engine uit
+    analysis_data = analyze_midi_deep(file_bytes)
+    if not analysis_data:
+        return {"error": "Geen geldige MIDI-noten gevonden in dit bestand."}
         
-        # Voer de theorie-engine uit
-        analysis_data = analyze_midi_deep(file_bytes)
-        if not analysis_data:
-            return {"error": "Geen geldige MIDI-noten gevonden in dit bestand."}
-            
-        # Voer de modder-check uit
-        freq_data = get_frequency_data(analysis_data["notes"])
-        
-        # Stuur het complete JSON-rapport terug
-        return {
-            "status": "success",
-            "filename": file.filename,
-            "theorie": analysis_data,         # <--- Deze mist waarschijnlijk!
-            "frequenties": freq_data          # <--- En deze ook!
-        }
+    # Voer de modder-check uit
+    freq_data = get_frequency_data(analysis_data["notes"])
+    
+    # Stuur het complete JSON-rapport terug
+    return {
+        "status": "success",
+        "filename": file.filename,
+        "theorie": analysis_data,         
+        "frequenties": freq_data          
+    }
 
 # 2. BASLIJN GENERATOR LOKET (GET)
 @app.get("/generate/bass")
 def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
     midi_bytes = generate_bassline_midi(root_number, genre, swing_amount)
     return Response(
-        content=midi_bytes,
+        content=midi_bytes, 
         media_type="audio/midi",
         headers={"Content-Disposition": f"attachment; filename=PA_Bass_{genre}.mid"}
     )
