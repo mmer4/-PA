@@ -286,24 +286,24 @@ def read_root():
 
 # 1. HET ANALYSE LOKET (POST)
 @app.post("/analyze")
-async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
-    file_bytes = await file.read()
-    
-    # Voer de theorie-engine uit
-    analysis_data = analyze_midi_deep(file_bytes)
-    if not analysis_data:
-        return {"error": "Geen geldige MIDI-noten gevonden in dit bestand."}
+    async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
+        file_bytes = await file.read()
         
-    # Voer de modder-check uit
-    freq_data = get_frequency_data(analysis_data["notes"])
-    
-    # Stuur het complete JSON-rapport terug
-    return {
-        "status": "success",
-        "filename": file.filename,
-        "theorie": analysis_data,
-        "frequenties": freq_data
-    }
+        # Voer de theorie-engine uit
+        analysis_data = analyze_midi_deep(file_bytes)
+        if not analysis_data:
+            return {"error": "Geen geldige MIDI-noten gevonden in dit bestand."}
+            
+        # Voer de modder-check uit
+        freq_data = get_frequency_data(analysis_data["notes"])
+        
+        # Stuur het complete JSON-rapport terug
+        return {
+            "status": "success",
+            "filename": file.filename,
+            "theorie": analysis_data,         # <--- Deze mist waarschijnlijk!
+            "frequenties": freq_data          # <--- En deze ook!
+        }
 
 # 2. BASLIJN GENERATOR LOKET (GET)
 @app.get("/generate/bass")
