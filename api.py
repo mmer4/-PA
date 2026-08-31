@@ -310,12 +310,12 @@ def read_root():
 # 2. BASLIJN GENERATOR LOKET (GET)
 @app.get("/generate/bass")
     def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
-    midi_bytes = generate_bassline_midi(root_number, genre, swing_amount)
-    return Response(
-        content=midi_bytes,
-        media_type="audio/midi",
-        headers={"Content-Disposition": f"attachment; filename=PA_Bass_{genre}.mid"}  # Deze regel forceert de download!
-    )
+        midi_bytes = generate_bassline_midi(root_number, genre, swing_amount)
+        return Response(
+            content=midi_bytes,
+            media_type="audio/midi",
+            headers={"Content-Disposition": f"attachment; filename=PA_Bass_{genre}.mid"}  # Deze regel forceert de download!
+        )
 
 # 3. MELODIE GENERATOR LOKET (GET)
 @app.get("/generate/melody")
