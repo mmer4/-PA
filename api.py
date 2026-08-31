@@ -1,4 +1,6 @@
-from fastapi import FastAPI, UploadFile, File, Response
+from fastapi import FastAPI, UploadFile, File, Response, Depends, HTTPException, Security
+from fastapi.security.api_key import APIKeyHeader
+import os
 import mido
 import io
 import random
@@ -234,6 +236,18 @@ def generate_melody_midi(root_number, scale_type, genre, swing_amount):
     return schrijf_midi_events(events)
 app = FastAPI(title="Producer Adviser API", version="1.0")
 
+
+API_KEY_NAME = "X-API-KEY"
+
+
+VALID_API_KEY = os.environ.get("PA_API_KEY", "super-geheime-test-sleutel-123") 
+
+api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=True)
+
+async def check_api_key(api_key: str = Security(api_key_header)):
+    if api_key != VALID_API_KEY:
+        raise HTTPException(status_code=403, detail="Toegang geweigerd: Ongeldige of ontbrekende API sleutel.")
+    return api_key
 @app.get("/")
 def read_root():
     return {"status": "PA Server is online 🟢"}
@@ -274,7 +288,7 @@ def read_root():
 
 # 1. HET ANALYSE LOKET (POST)
 @app.post("/analyze")
-async def analyze_midi_endpoint(file: UploadFile = File(...)):
+    async def analyze_midi_endpoint(file: UploadFile = File(...), api_key: str = Depends(check_api_key)):
     file_bytes = await file.read()
     
     # Voer de theorie-engine uit
@@ -295,7 +309,7 @@ async def analyze_midi_endpoint(file: UploadFile = File(...)):
 
 # 2. BASLIJN GENERATOR LOKET (GET)
 @app.get("/generate/bass")
-def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20):
+    def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
     midi_bytes = generate_bassline_midi(root_number, genre, swing_amount)
     return Response(
         content=midi_bytes,
@@ -305,7 +319,7 @@ def generate_bass_endpoint(root_number: int, genre: str, swing_amount: int = 20)
 
 # 3. MELODIE GENERATOR LOKET (GET)
 @app.get("/generate/melody")
-def generate_melody_endpoint(root_number: int, scale_type: str, genre: str, swing_amount: int = 20):
+    def generate_melody_endpoint(root_number: int, scale_type: str, genre: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
         midi_bytes = generate_melody_midi(root_number, scale_type, genre, swing_amount)
         return Response(
             content=midi_bytes, 
@@ -315,7 +329,7 @@ def generate_melody_endpoint(root_number: int, scale_type: str, genre: str, swin
 
 # 4. DRUM STEMS GENERATOR LOKET (GET)
 @app.get("/generate/drums")
-def generate_drums_endpoint(genre: str, complexity: str, swing_amount: int = 20):
+    def generate_drums_endpoint(genre: str, complexity: str, swing_amount: int = 20, api_key: str = Depends(check_api_key)):
         zip_bytes = generate_drum_zip(genre, complexity, swing_amount)
         return Response(
             content=zip_bytes, 
